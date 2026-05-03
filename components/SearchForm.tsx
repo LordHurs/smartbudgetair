@@ -6,8 +6,8 @@ import { buildSearchUrl, getDefaultDepartDate, getDefaultReturnDate } from '@/li
 
 interface SearchFormProps {
   defaultOrigin?: string;
-  defaultDestination?: string;
-  defaultDestinationLabel?: string;
+  defaultDestination?: string;       // IATA code
+  defaultDestinationLabel?: string;  // display label
   compact?: boolean;
 }
 
@@ -27,58 +27,78 @@ export default function SearchForm({
   compact = false,
 }: SearchFormProps) {
   const [origin, setOrigin] = useState(defaultOrigin);
-  const [destination, setDestination] = useState(defaultDestination);
-  const [destinationLabel, setDestinationLabel] = useState(defaultDestinationLabel);
-  const [departDate, setDepartDate] = useState(getDefaultDepartDate());
-  const [returnDate, setReturnDate] = useState(getDefaultReturnDate());
   const [adults, setAdults] = useState(1);
   const [tripType, setTripType] = useState<'aller-retour' | 'aller-simple'>('aller-retour');
-  const [destSearch, setDestSearch] = useState(defaultDestinationLabel);
-  const [showDestDropdown, setShowDestDropdown] = useState(false);
+  const [departDate, setDepartDate] = useState(getDefaultDepartDate());
+  const [returnDate, setReturnDate] = useState(getDefaultReturnDate());
+
+  // --- destination state -------------------------------------------------
+  // `selectedIata` is the value sent in the URL — it is ONLY set when the
+  // user explicitly picks an entry from the dropdown.  `inputText` is what
+  // the user sees in the text box.  Keeping them separate prevents the form
+  // from silently submitting a stale or empty IATA code.
+  const [selectedIata, setSelectedIata]   = useState(defaultDestination);
+  const [selectedLabel, setSelectedLabel] = useState(defaultDestinationLabel);
+  const [inputText, setInputText]         = useState(defaultDestinationLabel);
+  const [dropdownOpen, setDropdownOpen]   = useState(false);
+  // -----------------------------------------------------------------------
+
   const destRef = useRef<HTMLDivElement>(null);
 
-  const filteredDest = POPULAR_DESTINATIONS.filter(
-    (d) =>
-      d.label.toLowerCase().includes(destSearch.toLowerCase()) ||
-      d.iata.toLowerCase().includes(destSearch.toLowerCase()),
-  ).slice(0, 8);
+  const suggestions = POPULAR_DESTINATIONS.filter((d) => {
+    const q = inputText.toLowerCase();
+    return (
+      d.label.toLowerCase().includes(q) ||
+      d.iata.toLowerCase().includes(q)
+    );
+  }).slice(0, 9);
 
+  // Close dropdown on outside click
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
+    function onMouseDown(e: MouseEvent) {
       if (destRef.current && !destRef.current.contains(e.target as Node)) {
-        setShowDestDropdown(false);
+        setDropdownOpen(false);
+        // If the user typed but never selected, restore the last confirmed label
+        if (!selectedIata) setInputText('');
+        else setInputText(selectedLabel);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [selectedIata, selectedLabel]);
+
+  function pickDestination(iata: string, label: string) {
+    setSelectedIata(iata);
+    setSelectedLabel(label);
+    setInputText(label);
+    setDropdownOpen(false);
+  }
+
+  function clearDestination() {
+    setSelectedIata('');
+    setSelectedLabel('');
+    setInputText('');
+    setDropdownOpen(true);
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    if (!destination || !departDate) return;
+    if (!selectedIata || !departDate) return;
 
     const url = buildSearchUrl({
       originIata: origin,
-      destinationIata: destination,
+      destinationIata: selectedIata,
       departDate,
-      returnDate: tripType === 'aller-retour' ? returnDate : undefined,
       adults,
     });
 
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 
-  function selectDestination(iata: string, label: string) {
-    setDestination(iata);
-    setDestinationLabel(label);
-    setDestSearch(label);
-    setShowDestDropdown(false);
-  }
-
   const inputBase =
-    'w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-gray-800 placeholder-gray-400 ' +
-    'focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all duration-200 ' +
-    'shadow-sm text-sm font-medium';
+    'w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 text-gray-800 ' +
+    'placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 ' +
+    'focus:border-transparent transition-all duration-200 shadow-sm text-sm font-medium';
 
   const labelBase = 'block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5';
 
@@ -103,11 +123,10 @@ export default function SearchForm({
       </div>
 
       <div className={`grid gap-4 ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-12'}`}>
-        {/* Origin */}
+
+        {/* ── Origin ── */}
         <div className={compact ? '' : 'lg:col-span-3'}>
-          <label className={labelBase}>
-            <span className="mr-1">✈</span> Départ de
-          </label>
+          <label className={labelBase}>✈ Départ de</label>
           <select
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
@@ -121,49 +140,89 @@ export default function SearchForm({
           </select>
         </div>
 
-        {/* Destination */}
+        {/* ── Destination autocomplete ── */}
         <div className={`relative ${compact ? '' : 'lg:col-span-3'}`} ref={destRef}>
-          <label className={labelBase}>
-            <span className="mr-1">🌍</span> Destination
-          </label>
-          <input
-            type="text"
-            value={destSearch}
-            onChange={(e) => {
-              setDestSearch(e.target.value);
-              setDestination('');
-              setShowDestDropdown(true);
-            }}
-            onFocus={() => setShowDestDropdown(true)}
-            placeholder="Ex : Dakar, Abidjan…"
-            className={inputBase}
-            autoComplete="off"
-          />
-          {showDestDropdown && filteredDest.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden max-h-60 overflow-y-auto">
-              {filteredDest.map((d) => (
+          <label className={labelBase}>🌍 Destination</label>
+
+          <div className="relative">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => {
+                setInputText(e.target.value);
+                // Invalidate the confirmed IATA whenever the user edits the text
+                setSelectedIata('');
+                setSelectedLabel('');
+                setDropdownOpen(true);
+              }}
+              onFocus={() => setDropdownOpen(true)}
+              placeholder="Ex : Dakar, Abidjan…"
+              className={`${inputBase} pr-20`}
+              autoComplete="off"
+            />
+
+            {/* IATA badge — shown when a destination is confirmed */}
+            {selectedIata && (
+              <div className="absolute right-10 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <span className="bg-brand-600 text-white text-xs font-bold px-1.5 py-0.5 rounded font-mono">
+                  {selectedIata}
+                </span>
+              </div>
+            )}
+
+            {/* Clear button */}
+            {inputText && (
+              <button
+                type="button"
+                onClick={clearDestination}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Effacer la destination"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Dropdown */}
+          {dropdownOpen && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden max-h-64 overflow-y-auto">
+              {suggestions.map((d) => (
                 <button
                   key={d.iata}
                   type="button"
-                  onClick={() => selectDestination(d.iata, d.label)}
-                  className="w-full text-left px-4 py-3 hover:bg-brand-50 transition-colors flex items-center gap-3 text-sm"
+                  onMouseDown={(e) => {
+                    // Use onMouseDown + preventDefault to prevent the input's
+                    // onBlur from firing before the click registers
+                    e.preventDefault();
+                    pickDestination(d.iata, d.label);
+                  }}
+                  className="w-full text-left px-4 py-3 hover:bg-brand-50 transition-colors flex items-center justify-between gap-3 text-sm"
                 >
-                  <span className="text-xl">{d.flag}</span>
-                  <div>
-                    <div className="font-medium text-gray-800">{d.label}</div>
-                    <div className="text-xs text-gray-400">{d.iata}</div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xl flex-shrink-0">{d.flag}</span>
+                    <span className="font-medium text-gray-800 truncate">{d.label}</span>
                   </div>
+                  <span className="font-mono text-xs font-bold text-brand-600 bg-brand-50 border border-brand-200 px-1.5 py-0.5 rounded flex-shrink-0">
+                    {d.iata}
+                  </span>
                 </button>
               ))}
             </div>
           )}
+
+          {/* No-match hint */}
+          {dropdownOpen && inputText.length >= 2 && suggestions.length === 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-100 z-50 px-4 py-3 text-sm text-gray-500">
+              Aucune destination trouvée pour « {inputText} »
+            </div>
+          )}
         </div>
 
-        {/* Depart date */}
+        {/* ── Departure date ── */}
         <div className={compact ? '' : 'lg:col-span-2'}>
-          <label className={labelBase}>
-            <span className="mr-1">📅</span> Départ
-          </label>
+          <label className={labelBase}>📅 Départ</label>
           <input
             type="date"
             value={departDate}
@@ -174,12 +233,10 @@ export default function SearchForm({
           />
         </div>
 
-        {/* Return date */}
+        {/* ── Return date ── */}
         {tripType === 'aller-retour' && (
           <div className={compact ? '' : 'lg:col-span-2'}>
-            <label className={labelBase}>
-              <span className="mr-1">📅</span> Retour
-            </label>
+            <label className={labelBase}>📅 Retour</label>
             <input
               type="date"
               value={returnDate}
@@ -190,11 +247,9 @@ export default function SearchForm({
           </div>
         )}
 
-        {/* Passengers */}
+        {/* ── Passengers ── */}
         <div className={compact ? '' : tripType === 'aller-retour' ? 'lg:col-span-1' : 'lg:col-span-3'}>
-          <label className={labelBase}>
-            <span className="mr-1">👤</span> Passagers
-          </label>
+          <label className={labelBase}>👤 Passagers</label>
           <select
             value={adults}
             onChange={(e) => setAdults(Number(e.target.value))}
@@ -208,11 +263,11 @@ export default function SearchForm({
           </select>
         </div>
 
-        {/* Submit */}
-        <div className={`flex items-end ${compact ? '' : tripType === 'aller-retour' ? 'lg:col-span-1' : 'lg:col-span-1'}`}>
+        {/* ── Submit ── */}
+        <div className="flex items-end lg:col-span-1">
           <button
             type="submit"
-            disabled={!destination}
+            disabled={!selectedIata}
             className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold
                        px-6 py-3.5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg
                        focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2
@@ -226,10 +281,13 @@ export default function SearchForm({
         </div>
       </div>
 
-      {!destination && destSearch.length > 0 && (
+      {/* Validation hint */}
+      {!selectedIata && inputText.length > 0 && (
         <p className="mt-2 text-xs text-amber-600 flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          Sélectionnez une destination dans la liste
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          Sélectionnez une destination dans la liste pour obtenir le bon code aéroport
         </p>
       )}
     </form>

@@ -32,7 +32,7 @@ export interface Destination {
 
 export const AFRICAN_DESTINATIONS: Destination[] = [
   {
-    iata: 'DKR', name: 'Aéroport International Blaise Diagne', city: 'Dakar',
+    iata: 'DSS', name: 'Aéroport International Blaise Diagne', city: 'Dakar',
     slug: 'dakar', country: 'Sénégal', flag: '🇸🇳',
     description: 'Capitale du Sénégal, ville vibrante sur la pointe ouest de l\'Afrique.',
   },
