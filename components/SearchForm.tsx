@@ -89,6 +89,7 @@ export default function SearchForm({
       originIata: origin,
       destinationIata: selectedIata,
       departDate,
+      returnDate: tripType === 'aller-retour' ? returnDate : undefined,
       adults,
     });
 
