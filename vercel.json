@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "regions": ["cdg1"],
+  "env": {
+    "NEXT_PUBLIC_TRAVELPAYOUTS_MARKER": "724585",
+    "NEXT_PUBLIC_SITE_URL": "https://smartbudgetair.com"
+  }
+}

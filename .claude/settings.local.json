@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(ls \"C:\\\\Program Files\" | Select-Object Name | Where-Object {$_.Name -match \"node|Node\"})"
+    ]
+  }
+}
