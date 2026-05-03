@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllRoutes } from '@/lib/routes';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://smartbudgetair.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://smartbudgetair.fr';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = getAllRoutes();
