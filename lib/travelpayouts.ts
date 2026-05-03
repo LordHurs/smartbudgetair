@@ -11,43 +11,27 @@ export interface SearchParams {
 /**
  * Build an Aviasales affiliate search URL.
  *
- * Aviasales compact path format:
- *   /search/{ORIGIN}{ADULTS}{DEST}{DDMMYYYY}[{DDMMYYYY_return}]?marker={MARKER}
- *
- * Examples:
- *   One-way:     /search/CDG1DKR10062026?marker=724585
- *   Round-trip:  /search/CDG1DKR1006202625062026?marker=724585
+ * Format: /search/{ORIGIN}{N_ADULTS}{DEST}{DDMMYYYY}?marker={MARKER}
+ * Example (one-way, 1 adult, CDG→CMN, 10 Jun 2026):
+ *   /search/CDG1CMN10062026?marker=724585
  */
 export function buildSearchUrl(params: SearchParams): string {
-  const {
-    originIata,
-    destinationIata,
-    departDate,
-    returnDate,
-    adults = 1,
-  } = params;
+  const { originIata, destinationIata, departDate, adults = 1 } = params;
 
-  const dep = ddmmyy(departDate);
-  const ret = returnDate ? ddmmyy(returnDate) : '';
+  // Parse YYYY-MM-DD into separate parts so there is no ambiguity
+  const [depYear, depMonth, depDay] = departDate.split('-');
 
-  // Format: {ORIGIN}{ADULTS}{DEST}{DDMMYYYY}[{DDMMYYYY}]
-  // e.g. one-way:    CDG1DKR10062026
-  //      round-trip: CDG1DKR10062026250620261  ← return date appended, no extra flag
-  const segment = returnDate
-    ? `${originIata}${adults}${destinationIata}${dep}${ret}`
-    : `${originIata}${adults}${destinationIata}${dep}`;
+  // Aviasales date format: DD MM YYYY  (each component zero-padded, full 4-digit year)
+  const depSegment = `${depDay}${depMonth}${depYear}`;
 
-  return `https://www.aviasales.fr/search/${segment}?marker=${MARKER}`;
+  // Always generate a one-way style URL; Aviasales shows round-trip options on its results page
+  const path = `${originIata}${adults}${destinationIata}${depSegment}`;
+
+  return `https://www.aviasales.fr/search/${path}?marker=${MARKER}`;
 }
 
-// Keep old name as alias so nothing else breaks
+// Alias kept for backwards compatibility
 export const buildAviasalesUrl = buildSearchUrl;
-
-function ddmmyy(dateStr: string): string {
-  // YYYY-MM-DD → DDMMYYYY  (full 4-digit year required by Aviasales)
-  const [year, month, day] = dateStr.split('-');
-  return `${day}${month}${year}`;
-}
 
 export function getDefaultDepartDate(): string {
   const d = new Date();
