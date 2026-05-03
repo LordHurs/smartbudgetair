@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { FRENCH_AIRPORTS, POPULAR_DESTINATIONS } from '@/lib/airports';
 import { buildSearchUrl, getDefaultDepartDate, getDefaultReturnDate } from '@/lib/travelpayouts';
 
@@ -27,8 +26,6 @@ export default function SearchForm({
   defaultDestinationLabel = '',
   compact = false,
 }: SearchFormProps) {
-  const router = useRouter();
-
   const [origin, setOrigin] = useState(defaultOrigin);
   const [destination, setDestination] = useState(defaultDestination);
   const [destinationLabel, setDestinationLabel] = useState(defaultDestinationLabel);

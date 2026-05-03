@@ -6,41 +6,19 @@ export interface SearchParams {
   departDate: string;   // YYYY-MM-DD
   returnDate?: string;  // YYYY-MM-DD
   adults?: number;
-  children?: number;
-  infants?: number;
 }
 
 /**
- * Build an Aviasales affiliate search URL via Travelpayouts marker.
- * Uses the Aviasales search URL format with the affiliate marker appended.
- */
-export function buildAviasalesUrl(params: SearchParams): string {
-  const {
-    originIata,
-    destinationIata,
-    departDate,
-    returnDate,
-    adults = 1,
-    children = 0,
-    infants = 0,
-  } = params;
-
-  const base = new URL('https://www.aviasales.fr/search');
-
-  // Aviasales compact URL format: {ORIGIN}{ADULTS}{DEST}{DDMMYY_depart}{DDMMYY_return}{0|1}
-  const depFormatted = formatDateForAviasales(departDate);
-  const retFormatted = returnDate ? formatDateForAviasales(returnDate) : '';
-
-  const segment = `${originIata}${adults}${destinationIata}${depFormatted}${retFormatted}${children > 0 ? children : ''}${infants > 0 ? infants : ''}`;
-
-  base.pathname = `/search/${segment}`;
-  base.searchParams.set('marker', MARKER);
-
-  return base.toString();
-}
-
-/**
- * Build a Travelpayouts search redirect URL (alternative, cleaner format).
+ * Build an Aviasales affiliate search URL.
+ *
+ * Aviasales compact path format:
+ *   /search/{ORIGIN}{ADULTS}{DEST}{DDMMYY_dep}[{DDMMYY_ret}1]?marker={MARKER}
+ *
+ * Examples:
+ *   One-way:     /search/CDG1DKR010626?marker=724585
+ *   Round-trip:  /search/CDG1DKR0106261006261?marker=724585
+ *                                             ^------^ return DDMMYY
+ *                                                     ^ trailing 1 = round-trip flag
  */
 export function buildSearchUrl(params: SearchParams): string {
   const {
@@ -49,27 +27,24 @@ export function buildSearchUrl(params: SearchParams): string {
     departDate,
     returnDate,
     adults = 1,
-    children = 0,
-    infants = 0,
   } = params;
 
-  const url = new URL('https://search.aviasales.fr/');
-  url.searchParams.set('origin', originIata);
-  url.searchParams.set('destination', destinationIata);
-  url.searchParams.set('depart_date', departDate);
-  if (returnDate) url.searchParams.set('return_date', returnDate);
-  url.searchParams.set('adults', String(adults));
-  if (children > 0) url.searchParams.set('children', String(children));
-  if (infants > 0) url.searchParams.set('infants', String(infants));
-  url.searchParams.set('marker', MARKER);
-  url.searchParams.set('locale', 'fr');
-  url.searchParams.set('currency', 'eur');
+  const dep = ddmmyy(departDate);
+  const ret = returnDate ? ddmmyy(returnDate) : '';
 
-  return url.toString();
+  // Trailing "1" marks a round-trip; omit for one-way
+  const segment = returnDate
+    ? `${originIata}${adults}${destinationIata}${dep}${ret}1`
+    : `${originIata}${adults}${destinationIata}${dep}`;
+
+  return `https://www.aviasales.fr/search/${segment}?marker=${MARKER}`;
 }
 
-function formatDateForAviasales(dateStr: string): string {
-  // Convert YYYY-MM-DD → DDMMYY
+// Keep old name as alias so nothing else breaks
+export const buildAviasalesUrl = buildSearchUrl;
+
+function ddmmyy(dateStr: string): string {
+  // YYYY-MM-DD → DDMMYY
   const [year, month, day] = dateStr.split('-');
   return `${day}${month}${year.slice(2)}`;
 }
