@@ -91,6 +91,11 @@ export const AFRICAN_DESTINATIONS: Destination[] = [
     slug: 'kinshasa', country: 'République démocratique du Congo', flag: '🇨🇩',
     description: 'Capitale de la RDC, l\'une des plus grandes villes d\'Afrique et cœur de l\'Afrique centrale francophone.',
   },
+  {
+    iata: 'BZV', name: 'Aéroport International Maya-Maya', city: 'Brazzaville',
+    slug: 'brazzaville', country: 'Congo', flag: '🇨🇬',
+    description: 'Capitale de la République du Congo, ville en bord du fleuve Congo face à Kinshasa.',
+  },
 ];
 
 export function getAirportBySlug(slug: string): Airport | undefined {

@@ -129,7 +129,7 @@ export default function HomePage() {
               Volez depuis toute la France
             </h2>
             <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-              10 aéroports français connectés à 12 destinations africaines. Trouvez votre vol au départ le plus proche.
+              10 aéroports français connectés à 13 destinations africaines. Trouvez votre vol au départ le plus proche.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
