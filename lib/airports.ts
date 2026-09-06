@@ -96,6 +96,11 @@ export const AFRICAN_DESTINATIONS: Destination[] = [
     slug: 'brazzaville', country: 'Congo', flag: '🇨🇬',
     description: 'Capitale de la République du Congo, ville en bord du fleuve Congo face à Kinshasa.',
   },
+  {
+    iata: 'CKY', name: 'Aéroport International Ahmed-Sékou-Touré', city: 'Conakry',
+    slug: 'conakry', country: 'Guinée', flag: '🇬🇳',
+    description: 'Capitale de la Guinée, ville portuaire sur la côte atlantique d\'Afrique de l\'Ouest.',
+  },
 ];
 
 export function getAirportBySlug(slug: string): Airport | undefined {
