@@ -81,6 +81,11 @@ export const AFRICAN_DESTINATIONS: Destination[] = [
     slug: 'accra', country: 'Ghana', flag: '🇬🇭',
     description: 'Capitale du Ghana, ville moderne et hub régional en plein essor.',
   },
+  {
+    iata: 'ALG', name: 'Aéroport International Houari-Boumédiène', city: 'Alger',
+    slug: 'alger', country: 'Algérie', flag: '🇩🇿',
+    description: 'Capitale de l\'Algérie, plus grande ville du Maghreb sur la côte méditerranéenne.',
+  },
 ];
 
 export function getAirportBySlug(slug: string): Airport | undefined {

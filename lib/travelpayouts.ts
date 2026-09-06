@@ -27,6 +27,7 @@ const IATA_TO_CITY: Record<string, string> = {
   NBO: 'NBO',
   LOS: 'LOS',
   ACC: 'ACC',
+  ALG: 'ALG',
 };
 
 export interface SearchParams {
