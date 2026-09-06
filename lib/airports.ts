@@ -86,6 +86,11 @@ export const AFRICAN_DESTINATIONS: Destination[] = [
     slug: 'alger', country: 'Algérie', flag: '🇩🇿',
     description: 'Capitale de l\'Algérie, plus grande ville du Maghreb sur la côte méditerranéenne.',
   },
+  {
+    iata: 'FIH', name: 'Aéroport International de N\'Djili', city: 'Kinshasa',
+    slug: 'kinshasa', country: 'République démocratique du Congo', flag: '🇨🇩',
+    description: 'Capitale de la RDC, l\'une des plus grandes villes d\'Afrique et cœur de l\'Afrique centrale francophone.',
+  },
 ];
 
 export function getAirportBySlug(slug: string): Airport | undefined {
