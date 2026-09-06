@@ -5,8 +5,8 @@ const stats = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    value: '200+',
-    label: 'Destinations',
+    value: '280+',
+    label: 'Trajets France ↔ Afrique',
     color: 'text-brand-600 bg-brand-50',
   },
   {
@@ -17,7 +17,7 @@ const stats = [
     ),
     value: '100%',
     label: 'Gratuit',
-    color: 'text-green-600 bg-green-50',
+    color: 'text-brand-700 bg-brand-50',
   },
   {
     icon: (
@@ -27,7 +27,7 @@ const stats = [
     ),
     value: 'Sécurisé',
     label: 'Paiement via partenaires',
-    color: 'text-purple-600 bg-purple-50',
+    color: 'text-brand-800 bg-brand-50',
   },
   {
     icon: (
@@ -37,7 +37,7 @@ const stats = [
     ),
     value: 'Instantané',
     label: 'Résultats en temps réel',
-    color: 'text-amber-600 bg-amber-50',
+    color: 'text-sunset-600 bg-sunset-50',
   },
 ];
 

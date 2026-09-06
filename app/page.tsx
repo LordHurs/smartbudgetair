@@ -16,21 +16,21 @@ const HOW_IT_WORKS = [
     icon: '🔍',
     title: 'Saisissez votre trajet',
     desc: 'Choisissez votre aéroport de départ, votre destination et vos dates de voyage.',
-    color: 'from-brand-500 to-brand-600',
+    color: 'from-brand-600 to-brand-800',
   },
   {
     step: '02',
     icon: '⚡',
     title: 'Comparez les offres',
     desc: 'Notre moteur compare instantanément les prix de toutes les compagnies aériennes.',
-    color: 'from-purple-500 to-purple-600',
+    color: 'from-sunset-500 to-sunset-600',
   },
   {
     step: '03',
     icon: '✈️',
     title: 'Réservez au meilleur prix',
     desc: 'Cliquez sur l\'offre choisie et réservez directement auprès de la compagnie.',
-    color: 'from-green-500 to-green-600',
+    color: 'from-brand-700 to-brand-900',
   },
 ];
 
@@ -39,20 +39,17 @@ export default function HomePage() {
     <>
       {/* ── Hero ── */}
       <section className="relative bg-hero-gradient overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
+        {/* Background: flight-path lines instead of a generic dot grid */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1400 600" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M-50 480 C 250 380, 450 520, 700 300 S 1150 60, 1450 120" fill="none" stroke="white" strokeWidth="1.5" strokeDasharray="2 10" strokeLinecap="round" />
+            <path d="M-50 180 C 200 260, 500 40, 780 180 S 1200 420, 1450 380" fill="none" stroke="white" strokeWidth="1.5" strokeDasharray="2 10" strokeLinecap="round" />
+            <circle cx="700" cy="300" r="4" fill="white" />
+            <circle cx="780" cy="180" r="4" fill="white" />
           </svg>
         </div>
 
-        {/* Decorative circles */}
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        {/* Decorative glow */}
         <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
@@ -62,8 +59,8 @@ export default function HomePage() {
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               Comparaison en temps réel · 100% Gratuit
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5">
-              Volez <span className="text-amber-300">moins cher</span><br className="hidden sm:block" />
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-5">
+              Volez <span className="text-sunset-300">moins cher</span><br className="hidden sm:block" />{' '}
               France <span className="text-brand-200">↔</span> Afrique
             </h1>
             <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto font-light">

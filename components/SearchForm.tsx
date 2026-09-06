@@ -126,7 +126,7 @@ export default function SearchForm({
       <div className={`grid gap-4 ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-12'}`}>
 
         {/* ── Origin ── */}
-        <div className={compact ? '' : 'lg:col-span-3'}>
+        <div className={compact ? '' : 'lg:col-span-2'}>
           <label className={labelBase}>✈ Départ de</label>
           <select
             value={origin}
@@ -135,7 +135,7 @@ export default function SearchForm({
           >
             {FRENCH_AIRPORTS.map((a) => (
               <option key={a.iata} value={a.iata}>
-                {a.flag} {a.city} ({a.iata})
+                {a.flag} {a.city.includes(a.iata) ? a.city : `${a.city} (${a.iata})`}
               </option>
             ))}
           </select>
@@ -265,13 +265,13 @@ export default function SearchForm({
         </div>
 
         {/* ── Submit ── */}
-        <div className="flex items-end lg:col-span-1">
+        <div className="flex items-end lg:col-span-2">
           <button
             type="submit"
             disabled={!selectedIata}
-            className="w-full bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold
+            className="w-full bg-sunset-500 hover:bg-sunset-600 active:bg-sunset-700 text-white font-bold
                        px-6 py-3.5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg
-                       focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2
+                       focus:outline-none focus:ring-2 focus:ring-sunset-400 focus:ring-offset-2
                        disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
           >
             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
