@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { FRENCH_AIRPORTS, POPULAR_DESTINATIONS } from '@/lib/airports';
-import { buildSearchUrl, getDefaultDepartDate, getDefaultReturnDate } from '@/lib/travelpayouts';
+import { buildSearchUrl, getDefaultDepartDate, getDefaultReturnDate, getMaxBookableDate } from '@/lib/travelpayouts';
 
 interface SearchFormProps {
   defaultOrigin?: string;
@@ -31,6 +31,7 @@ export default function SearchForm({
   const [tripType, setTripType] = useState<'aller-retour' | 'aller-simple'>('aller-retour');
   const [departDate, setDepartDate] = useState(getDefaultDepartDate());
   const [returnDate, setReturnDate] = useState(getDefaultReturnDate());
+  const maxDate = getMaxBookableDate();
 
   // --- destination state -------------------------------------------------
   // `selectedIata` is the value sent in the URL — it is ONLY set when the
@@ -228,6 +229,7 @@ export default function SearchForm({
             type="date"
             value={departDate}
             min={new Date().toISOString().split('T')[0]}
+            max={maxDate}
             onChange={(e) => setDepartDate(e.target.value)}
             className={inputBase}
             required
@@ -242,6 +244,7 @@ export default function SearchForm({
               type="date"
               value={returnDate}
               min={departDate}
+              max={maxDate}
               onChange={(e) => setReturnDate(e.target.value)}
               className={inputBase}
             />

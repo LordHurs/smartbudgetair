@@ -87,3 +87,20 @@ export function getDefaultReturnDate(): string {
   d.setDate(d.getDate() + 44);
   return d.toISOString().split('T')[0];
 }
+
+/**
+ * Latest selectable date in the search form.
+ *
+ * Two independent reasons cap it at 11 months out:
+ *  1. Airlines don't open bookings further ahead than ~10-11 months, so a
+ *     later date wouldn't correspond to any real, bookable flight.
+ *  2. Aviasales affiliate search URLs only carry the day and month
+ *     (DDMM — see buildSearchUrl below), never the year. Beyond 12 months,
+ *     that becomes ambiguous and Aviasales silently resolves it to the
+ *     wrong year instead of the one the user picked.
+ */
+export function getMaxBookableDate(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 11);
+  return d.toISOString().split('T')[0];
+}
