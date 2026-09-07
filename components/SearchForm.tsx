@@ -11,6 +11,28 @@ interface SearchFormProps {
   compact?: boolean;
 }
 
+/** YYYY-MM-DD -> "20 novembre 2027" */
+function formatDateFr(dateStr: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+/**
+ * Keeps a typed-in date within [min, max]. The native <input type="date">
+ * min/max attributes only restrict the picker widget, not manual typing
+ * (e.g. editing the year segment directly), so this is the real guard.
+ */
+function clampDate(value: string, min: string, max: string): string {
+  if (!value) return value;
+  if (value < min) return min;
+  if (value > max) return max;
+  return value;
+}
+
 const PASSENGERS_OPTIONS = [
   { value: 1, label: '1 adulte' },
   { value: 2, label: '2 adultes' },
@@ -31,6 +53,7 @@ export default function SearchForm({
   const [tripType, setTripType] = useState<'aller-retour' | 'aller-simple'>('aller-retour');
   const [departDate, setDepartDate] = useState(getDefaultDepartDate());
   const [returnDate, setReturnDate] = useState(getDefaultReturnDate());
+  const [dateError, setDateError] = useState('');
   const maxDate = getMaxBookableDate();
 
   // --- destination state -------------------------------------------------
@@ -85,6 +108,22 @@ export default function SearchForm({
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedIata || !departDate) return;
+
+    // The <input type="date"> min/max attributes only constrain the native
+    // picker widget — a typed-in date can still slip through in some
+    // browsers. Enforce the real bounds here before ever building the URL.
+    const today = new Date().toISOString().split('T')[0];
+    if (departDate < today || departDate > maxDate) {
+      setDateError(
+        `La date de départ doit être comprise entre aujourd'hui et le ${formatDateFr(maxDate)} (les compagnies n'ouvrent pas les réservations au-delà).`
+      );
+      return;
+    }
+    if (tripType === 'aller-retour' && returnDate && (returnDate < departDate || returnDate > maxDate)) {
+      setDateError(`La date de retour doit être comprise entre le départ et le ${formatDateFr(maxDate)}.`);
+      return;
+    }
+    setDateError('');
 
     const url = buildSearchUrl({
       originIata: origin,
@@ -230,7 +269,15 @@ export default function SearchForm({
             value={departDate}
             min={new Date().toISOString().split('T')[0]}
             max={maxDate}
-            onChange={(e) => setDepartDate(e.target.value)}
+            onChange={(e) => {
+              setDateError('');
+              const newDepart = clampDate(e.target.value, new Date().toISOString().split('T')[0], maxDate);
+              setDepartDate(newDepart);
+              // Keep the return date valid if the new departure date passes it
+              if (returnDate && returnDate < newDepart) {
+                setReturnDate(clampDate(newDepart, newDepart, maxDate));
+              }
+            }}
             className={inputBase}
             required
           />
@@ -245,7 +292,10 @@ export default function SearchForm({
               value={returnDate}
               min={departDate}
               max={maxDate}
-              onChange={(e) => setReturnDate(e.target.value)}
+              onChange={(e) => {
+                setDateError('');
+                setReturnDate(clampDate(e.target.value, departDate, maxDate));
+              }}
               className={inputBase}
             />
           </div>
@@ -285,13 +335,21 @@ export default function SearchForm({
         </div>
       </div>
 
-      {/* Validation hint */}
+      {/* Validation hints */}
       {!selectedIata && inputText.length > 0 && (
         <p className="mt-2 text-xs text-amber-600 flex items-center gap-1">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
           Sélectionnez une destination dans la liste pour obtenir le bon code aéroport
+        </p>
+      )}
+      {dateError && (
+        <p className="mt-2 text-xs text-amber-600 flex items-center gap-1">
+          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          {dateError}
         </p>
       )}
     </form>
